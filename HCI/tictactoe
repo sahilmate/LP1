@@ -1,0 +1,90 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# Define a class for the Tic Tac Toe game
+class TicTacToe:
+    def __init__(self, master):
+        # Initialize the game window
+        self.master = master
+        self.master.title("Tic Tac Toe")
+        
+        # Initialize the game board and the current player
+        self.current_player = "X"
+        self.board = [["", "", ""], ["", "", ""], ["", "", ""]]
+        
+        # Create the buttons for the game board
+        self.buttons = []
+        for row in range(3):
+            button_row = []
+            for col in range(3):
+                button = tk.Button(
+                    self.master,
+                    text="",
+                    font=("Helvetica", 30),
+                    width=3,
+                    height=1,
+                    command=lambda row=row, col=col: self.handle_click(row, col)
+                )
+                button.grid(row=row, column=col, sticky="nsew")
+                button_row.append(button)
+            self.buttons.append(button_row)
+
+    def handle_click(self, row, col):
+        # Check if the clicked cell is empty
+        if self.board[row][col] == "":
+            self.board[row][col] = self.current_player
+            self.buttons[row][col].config(text=self.current_player)
+            # Check if the current player has won or the game is tied
+            if self.check_win():
+                self.game_over(f"Player {self.current_player} wins!")
+            elif self.check_tie():
+                self.game_over("It's a tie!")
+            else:
+                # Switch to the other player's turn
+                self.switch_player()
+
+    def switch_player(self):
+        # Alternate between "X" and "O" after each move
+        self.current_player = "O" if self.current_player == "X" else "X"
+
+    def check_win(self):
+        # Check rows, columns, and diagonals for a win
+        for i in range(3):
+            if self.board[i][0] == self.board[i][1] == self.board[i][2] != "":
+                return True
+            if self.board[0][i] == self.board[1][i] == self.board[2][i] != "":
+                return True
+        if self.board[0][0] == self.board[1][1] == self.board[2][2] != "":
+            return True
+        if self.board[2][0] == self.board[1][1] == self.board[0][2] != "":
+            return True
+        return False
+
+    def check_tie(self):
+        # Check if all cells are filled and no one has won
+        for row in self.board:
+            if "" in row:
+                return False
+        return True
+
+    def game_over(self, message):
+        # Display the game-over message and ask if the players want to play again
+        for row in self.buttons:
+            for button in row:
+                button.config(state="disabled")
+        # Show a message box with the result and option to restart
+        if messagebox.askyesno("Game Over", f"{message}\nDo you want to play again?"):
+            self.reset_game()
+
+    def reset_game(self):
+        # Reset the game board and re-enable all buttons
+        self.current_player = "X"
+        self.board = [["", "", ""], ["", "", ""], ["", "", ""]]
+        for row in range(3):
+            for col in range(3):
+                self.buttons[row][col].config(text="", state="normal")
+
+# Create the main window and start the game
+root = tk.Tk()
+game = TicTacToe(root)
+root.mainloop()
