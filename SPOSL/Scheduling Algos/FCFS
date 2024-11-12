@@ -1,4 +1,4 @@
-//FCFS
+//FCFS nonpreemptive
 package FCFS;
 import java.util.*;
 
