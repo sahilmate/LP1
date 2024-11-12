@@ -1,0 +1,86 @@
+package src;
+import java.io.*;
+import java.util.*;
+
+public class LRU {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int frames, hit = 0, fault = 0, ref_len;
+        Boolean isFull = false;
+        int[] buffer;
+        LinkedList<Integer> stack = new LinkedList<>();
+        int[] reference;
+        int[][] mem_layout;
+
+        // Input the number of frames
+        System.out.print("Please Enter the No. of Frames: ");
+        frames = Integer.parseInt(br.readLine());
+
+        // Input the length of reference string 
+        System.out.println("Please Enter the length of Reference string: ");
+        ref_len = Integer.parseInt(br.readLine());
+
+        // Initialize the reference array, memory layout, and buffer
+        reference = new int[ref_len];
+        mem_layout = new int[ref_len][frames];
+        buffer = new int[frames];
+        
+        // Initialize the buffer with -1 to represent empty slots
+        Arrays.fill(buffer, -1);
+
+        // Input the reference string (page requests)
+        System.out.println("Please Enter the Reference string: ");
+        for (int i = 0; i < ref_len; i++) {
+            reference[i] = Integer.parseInt(br.readLine());
+        }
+
+        // Process the reference string and apply LRU page replacement
+        for (int i = 0; i < ref_len; i++) {
+            int search = -1;
+
+            // Check if the page is already in memory (hit)
+            if (stack.contains(reference[i])) {
+                stack.remove((Integer) reference[i]); // Remove the page from the stack
+                stack.add(reference[i]); // Re-add the page to the end (most recent)
+                hit++; // Increment hit count
+                continue; // Skip to the next page request
+            }
+
+            // If the page is not in memory (fault), replace the least recently used page
+            if (stack.size() < frames) {
+                // There's space in the buffer
+                stack.add(reference[i]);
+            } else {
+                // The buffer is full, remove the least recently used page
+                stack.removeFirst(); // Remove the least recently used page
+                stack.add(reference[i]); // Add the new page
+            }
+            fault++; // Increment fault count
+
+            // Update memory layout for visualization
+            for (int j = 0; j < frames; j++) {
+                if (j < stack.size()) {
+                    buffer[j] = stack.get(j); // Fill buffer with pages from the stack
+                } else {
+                    buffer[j] = -1; // Empty frame
+                }
+                mem_layout[i][j] = buffer[j]; // Save memory layout for this step
+            }
+        }
+
+        // Print memory layout after processing all references
+        System.out.println("\nMemory Layout:");
+        for (int i = 0; i < ref_len; i++) {
+            for (int j = 0; j < frames; j++) {
+                System.out.printf("%3d", mem_layout[i][j]);
+            }
+            System.out.println();
+        }
+
+        // Print results (hits, faults, hit ratio, fault ratio)
+        System.out.println("\nThe No. of Hits: " + hit);
+        System.out.println("Hit Ratio: " + (float) hit / ref_len);
+        System.out.println("The No. of Faults: " + fault);
+        System.out.println("Fault Ratio: " + (float) fault / ref_len);
+    }
+}
